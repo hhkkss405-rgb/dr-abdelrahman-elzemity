@@ -1,68 +1,63 @@
-// Configuration
+// ==========================================
+// رابط Google Apps Script بتاعك (شغال!)
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdM2IOtynsJAPu1cnBHJJcoZH6Z0w9t4lVtKQ4THpQbZ9deYXEZA8TxbAE-_SiaaJG/exec';
+// ==========================================
+
 const ADMIN_PASSWORD = 'admin2026';
 const DOCTOR_WHATSAPP = '201095810582';
 
-// Initialize LocalStorage
-if (!localStorage.getItem('bookings')) {
-    localStorage.setItem('bookings', JSON.stringify([]));
-}
-
-// Booking Form Submission
+// ==================== FORM الحجز ====================
 const bookingForm = document.getElementById('bookingForm');
 if (bookingForm) {
-    // Set minimum date to today
     const dateInput = document.getElementById('date');
     const today = new Date().toISOString().split('T')[0];
-    dateInput.setAttribute('min', today);
+    dateInput.min = today;
     
-    // Disable Fridays
     dateInput.addEventListener('input', function() {
         const selectedDate = new Date(this.value);
-        if (selectedDate.getDay() === 5) { // Friday = 5
-            showMessage('عذراً، يوم الجمعة إجازة. الرجاء اختيار يوم آخر.', 'error');
+        if (selectedDate.getDay() === 5) { // الجمعة
+            showMessage('عذراً، يوم الجمعة إجازة. اختر يوم آخر.', 'error');
             this.value = '';
         }
     });
 
-    bookingForm.addEventListener('submit', function(e) {
+    bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Get form data
         const formData = {
-            id: Date.now(),
             name: document.getElementById('name').value,
             phone: document.getElementById('phone').value,
             gender: document.getElementById('gender').value,
             branch: document.getElementById('branch').value,
             date: document.getElementById('date').value,
             service: document.getElementById('service').value,
-            notes: document.getElementById('notes').value,
-            timestamp: new Date().toLocaleString('ar-EG')
+            notes: document.getElementById('notes').value || ''
         };
         
-        // Save to LocalStorage
-        let bookings = JSON.parse(localStorage.getItem('bookings'));
-        bookings.push(formData);
-        localStorage.setItem('bookings', JSON.stringify(bookings));
+        // 1. إرسال للـ Google Sheet (تلقائي)
+        try {
+            const params = new URLSearchParams(formData).toString();
+            await fetch(`${SCRIPT_URL}?${params}`, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+        } catch (err) {
+            console.error('Sheet error:', err);
+        }
         
-        // Send WhatsApp message
+        // 2. فتح واتساب (زي الأول)
         sendWhatsAppMessage(formData);
         
-        // Show success message
-        showMessage('تم تأكيد حجزك بنجاح! سيتم التواصل معك قريباً.', 'success');
-        
-        // Reset form
+        // نجح!
+        showMessage('🎉 تم تأكيد الحجز! سيتم التواصل قريباً.', 'success');
         bookingForm.reset();
-        
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
-// Send WhatsApp Message
 function sendWhatsAppMessage(data) {
-    const message = `
-🏥 *حجز جديد من العيادة*
+    const message = `🏥 *حجز جديد في عيادة الدكتور عبدالرحمن الزميتي*
 
 👤 *الاسم:* ${data.name}
 📱 *الهاتف:* ${data.phone}
@@ -70,100 +65,101 @@ function sendWhatsAppMessage(data) {
 🏥 *الفرع:* ${data.branch}
 📅 *التاريخ:* ${data.date}
 💊 *نوع الخدمة:* ${data.service}
-📝 *ملاحظات:* ${data.notes || 'لا توجد'}
+📝 *ملاحظات:* ${data.notes || 'لا يوجد'}
 
-⏰ *تم الحجز في:* ${data.timestamp}
-    `.trim();
+⏰ *وقت الحجز:* ${new Date().toLocaleString('ar-EG')}`;
     
-    const whatsappUrl = `https://wa.me/${DOCTOR_WHATSAPP}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    const url = `https://wa.me/${DOCTOR_WHATSAPP}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
 }
 
-// Show Message
-function showMessage(message, type = 'success') {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-    messageDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
-    document.body.appendChild(messageDiv);
-    
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 5000);
+function showMessage(msg, type = 'success') {
+    const div = document.createElement('div');
+    div.className = `success-message ${type === 'error' ? 'error-message' : ''}`;
+    div.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${msg}`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
 }
 
-// Admin Login
+// ==================== لوحة الإدارة ====================
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
-    loginForm.addEventListener('submit', function(e) {
+    loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const password = document.getElementById('password').value;
-        
-        if (password === ADMIN_PASSWORD) {
+        if (document.getElementById('password').value === ADMIN_PASSWORD) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
-            loadBookings();
-            updateStatistics();
+            loadBookings(); // تحميل أول مرة
         } else {
-            showMessage('كلمة المرور غير صحيحة!', 'error');
+            showMessage('كلمة المرور خاطئة!', 'error');
         }
     });
 }
 
-// Logout
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
-    logoutBtn.addEventListener('submit', function() {
+    logoutBtn.addEventListener('click', () => {
         document.getElementById('adminDashboard').style.display = 'none';
         document.getElementById('loginSection').style.display = 'flex';
         document.getElementById('password').value = '';
     });
 }
 
-// Load Bookings
-function loadBookings(filter = {}) {
-    const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+let lastCount = 0;
+async function loadBookings() {
+    try {
+        const res = await fetch(SCRIPT_URL);
+        const bookings = await res.json();
+        
+        displayBookings(bookings);
+        updateStats(bookings);
+        
+        // صوت تنبيه لو حجز جديد
+        if (bookings.length > lastCount) {
+            playNotification();
+        }
+        lastCount = bookings.length;
+        
+    } catch (err) {
+        console.error(err);
+        document.getElementById('bookingsBody').innerHTML = '<tr><td colspan="10" class="no-data">خطأ في التحميل، جرب تاني</td></tr>';
+    }
+}
+
+// عرض الحجوزات مع فلاتر
+function displayBookings(bookings) {
     const tbody = document.getElementById('bookingsBody');
-    
     if (!tbody) return;
     
-    let filteredBookings = bookings;
+    // فلاتر
+    const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const branch = document.getElementById('filterBranch')?.value || '';
+    const date = document.getElementById('filterDate')?.value || '';
     
-    // Apply filters
-    if (filter.search) {
-        filteredBookings = filteredBookings.filter(b => 
-            b.name.includes(filter.search) || b.phone.includes(filter.search)
-        );
-    }
+    let filtered = bookings.filter(b => 
+        (!search || (b.name?.toLowerCase().includes(search) || b.phone?.includes(search))) &&
+        (!branch || b.branch === branch) &&
+        (!date || b.date === date)
+    ).reverse(); // الأحدث أول
     
-    if (filter.branch) {
-        filteredBookings = filteredBookings.filter(b => b.branch === filter.branch);
-    }
-    
-    if (filter.date) {
-        filteredBookings = filteredBookings.filter(b => b.date === filter.date);
-    }
-    
-    // Sort by newest first
-    filteredBookings.reverse();
-    
-    if (filteredBookings.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="no-data">لا توجد حجوزات</td></tr>';
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="no-data">لا توجد حجوزات مطابقة</td></tr>';
         return;
     }
     
-    tbody.innerHTML = filteredBookings.map((booking, index) => `
+    tbody.innerHTML = filtered.map((b, i) => `
         <tr>
-            <td>${index + 1}</td>
-            <td>${booking.name}</td>
-            <td><a href="tel:${booking.phone}">${booking.phone}</a></td>
-            <td>${booking.gender}</td>
-            <td>${booking.branch}</td>
-            <td>${booking.date}</td>
-            <td>${booking.service}</td>
-            <td>${booking.notes || '-'}</td>
-            <td>${booking.timestamp}</td>
+            <td>${i + 1}</td>
+            <td>${b.name || '-'}</td>
+            <td><a href="tel:${b.phone}">${b.phone || '-'}</a></td>
+            <td>${b.gender || '-'}</td>
+            <td>${b.branch || '-'}</td>
+            <td>${b.date || '-'}</td>
+            <td>${b.service || '-'}</td>
+            <td>${b.notes || '-'}</td>
+            <td>${b.createdAt || '-'}</td>
             <td>
-                <button class="delete-btn" onclick="deleteBooking(${booking.id})">
+                <button class="delete-btn" onclick="confirmDelete('${b.id}')">
                     <i class="fas fa-trash"></i> حذف
                 </button>
             </td>
@@ -171,103 +167,49 @@ function loadBookings(filter = {}) {
     `).join('');
 }
 
-// Delete Booking
-function deleteBooking(id) {
-    if (!confirm('هل أنت متأكد من حذف هذا الحجز؟')) return;
-    
-    let bookings = JSON.parse(localStorage.getItem('bookings'));
-    bookings = bookings.filter(b => b.id !== id);
-    localStorage.setItem('bookings', JSON.stringify(bookings));
-    
-    loadBookings();
-    updateStatistics();
-    showMessage('تم حذف الحجز بنجاح', 'success');
-}
-
-// Update Statistics
-function updateStatistics() {
-    const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+// إحصائيات
+function updateStats(bookings) {
     const today = new Date().toISOString().split('T')[0];
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
     
-    // Today's bookings
-    const todayBookings = bookings.filter(b => b.date === today).length;
-    
-    // Week's bookings
-    const weekBookings = bookings.filter(b => b.date >= weekAgo).length;
-    
-    // Total bookings
-    const totalBookings = bookings.length;
-    
-    // Branch bookings
-    const damietaBookings = bookings.filter(b => b.branch === 'دمياط الجديدة').length;
-    const zarqaBookings = bookings.filter(b => b.branch === 'الزرقا').length;
-    
-    // Update UI
-    const todayEl = document.getElementById('todayBookings');
-    const weekEl = document.getElementById('weekBookings');
-    const totalEl = document.getElementById('totalBookings');
-    const damietaEl = document.getElementById('damietaBookings');
-    const zarqaEl = document.getElementById('zarqaBookings');
-    
-    if (todayEl) todayEl.textContent = todayBookings;
-    if (weekEl) weekEl.textContent = weekBookings;
-    if (totalEl) totalEl.textContent = totalBookings;
-    if (damietaEl) damietaEl.textContent = damietaBookings;
-    if (zarqaEl) zarqaEl.textContent = zarqaBookings;
+    document.getElementById('todayBookings').textContent = bookings.filter(b => b.date === today).length;
+    document.getElementById('weekBookings').textContent = bookings.filter(b => new Date(b.date) >= new Date(weekAgo)).length;
+    document.getElementById('totalBookings').textContent = bookings.length;
+    document.getElementById('damietaBookings').textContent = bookings.filter(b => b.branch === 'دمياط الجديدة').length;
+    document.getElementById('zarqaBookings').textContent = bookings.filter(b => b.branch === 'الزرقا').length;
 }
 
-// Filters
-const searchInput = document.getElementById('searchInput');
-const filterBranch = document.getElementById('filterBranch');
-const filterDate = document.getElementById('filterDate');
-const clearFilters = document.getElementById('clearFilters');
-
-if (searchInput) {
-    searchInput.addEventListener('input', applyFilters);
+// صوت تنبيه
+function playNotification() {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjV/Y4uJNwg='); // بيب قصير
+    audio.play().catch(() => {}); // لو المتصفح منع الصوت
 }
 
-if (filterBranch) {
-    filterBranch.addEventListener('change', applyFilters);
-}
-
-if (filterDate) {
-    filterDate.addEventListener('change', applyFilters);
-}
-
-if (clearFilters) {
-    clearFilters.addEventListener('click', function() {
-        searchInput.value = '';
-        filterBranch.value = '';
-        filterDate.value = '';
+// فلاتر
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const filterBranch = document.getElementById('filterBranch');
+    const filterDate = document.getElementById('filterDate');
+    const clearFilters = document.getElementById('clearFilters');
+    
+    if (searchInput) searchInput.addEventListener('input', loadBookings);
+    if (filterBranch) filterBranch.addEventListener('change', loadBookings);
+    if (filterDate) filterDate.addEventListener('change', loadBookings);
+    if (clearFilters) clearFilters.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        if (filterBranch) filterBranch.value = '';
+        if (filterDate) filterDate.value = '';
         loadBookings();
     });
-}
+    
+    // تحديث تلقائي كل 10 ثواني في الإدارة
+    setInterval(loadBookings, 10000);
+});
 
-function applyFilters() {
-    const filter = {
-        search: searchInput ? searchInput.value : '',
-        branch: filterBranch ? filterBranch.value : '',
-        date: filterDate ? filterDate.value : ''
-    };
-    loadBookings(filter);
-}
-
-// Notification Sound on New Booking (Check every 5 seconds)
-let lastBookingCount = 0;
-
-setInterval(() => {
-    if (document.getElementById('adminDashboard') && 
-        document.getElementById('adminDashboard').style.display !== 'none') {
-        const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
-        
-        if (bookings.length > lastBookingCount) {
-            const sound = document.getElementById('notificationSound');
-            if (sound) sound.play();
-            updateStatistics();
-            loadBookings();
-        }
-        
-        lastBookingCount = bookings.length;
+// حذف (يحذف من الشيت)
+function confirmDelete(id) {
+    if (confirm('متأكد إنك عايز تحذف الحجز ده؟')) {
+        // للحذف، روح على الشيت وامسح الصف يدوياً (أسهل للآن)
+        showMessage('للحذف: افتح Google Sheet وامسح الصف يدوياً', 'error');
     }
-}, 5000);
+}
