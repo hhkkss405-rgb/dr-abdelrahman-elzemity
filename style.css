@@ -167,4 +167,404 @@ section h2 i {
 .clinic-card {
     background: linear-gradient(135deg, #e3f2fd 0%, #f5f9ff 100%);
     padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border-right: 5px solid #0066cc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.clinic-card h3 {
+    color: #0066cc;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.clinic-card p {
+    margin: 10px 0;
+    font-size: 1rem;
+}
+
+.clinic-card i {
+    color: #0066cc;
+    margin-left: 10px;
+    width: 20px;
+}
+
+.clinic-card a {
+    color: #0066cc;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.clinic-card a:hover {
+    text-decoration: underline;
+}
+
+/* Booking Section */
+.booking-section {
+    background: linear-gradient(135deg, #0066cc 0%, #004c99 100%);
+    color: white;
+}
+
+.booking-section h2 {
+    color: white;
+}
+
+.booking-form {
+    max-width: 650px;
+    margin: 0 auto;
+    background: white;
+    padding: 45px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.form-group {
+    margin-bottom: 28px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 12px;
+    color: #333;
+    font-weight: 600;
+    font-size: 1.15rem;
+}
+
+.form-group label i {
+    color: #0066cc;
+    margin-left: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    transition: all 0.3s;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #0066cc;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #00cc66 0%, #009951 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 204, 102, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Footer */
+.footer {
+    background: #222;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.admin-link {
+    color: #0066cc;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}
+
+/* Admin Login */
+.admin-body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-section {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.login-box h2 {
+    color: #667eea;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #667eea;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Admin Dashboard */
+.admin-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.admin-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.logout-btn:hover {
+    background: #e84118;
+}
+
+/* Statistics */
+.stats-section {
+    background: white;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.stat-card h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Filters */
+.filters-section {
+    background: #f5f7fa;
+    padding: 30px 0;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filters input,
+.filters select {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.clear-btn {
+    padding: 12px 20px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.clear-btn:hover {
+    background: #e84118;
+}
+
+/* Bookings Table */
+.bookings-section {
+    background: white;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.bookings-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.bookings-table th,
+.bookings-table td {
+    padding: 15px;
+    text-align: right;
+    border-bottom: 1px solid #eee;
+}
+
+.bookings-table tbody tr:hover {
+    background: #f5f7fa;
+}
+
+.bookings-table .no-data {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+    font-size: 1.2rem;
+}
+
+.delete-btn {
+    padding: 8px 15px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.delete-btn:hover {
+    background: #e84118;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .doctor-profile {
+        flex-direction: column;
+        text-align: center;
+    }
     
+    .doctor-info h1 {
+        font-size: 1.5rem;
+    }
+    
+    .booking-form {
+        padding: 25px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters {
+        grid-template-columns: 1fr;
+    }
+    
+    .bookings-table {
+        font-size: 0.9rem;
+    }
+    
+    .bookings-table th,
+    .bookings-table td {
+        padding: 10px;
+    }
+}
+
+/* Success Message */
+.success-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00cc66;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    z-index: 10000;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
+}
+
+.error-message {
+    background: #ff4757 !important;
+}
