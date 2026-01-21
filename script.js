@@ -5,8 +5,8 @@ const _0xURL2 = 'AKfycbwdM2IOtynsJAPu1cnBHJJcoZH6Z0w9t4lVtKQ4THpQbZ9deYXEZA8TxbA
 const _0xURL3 = '/exec';
 const SCRIPT_URL = _0xURL1 + _0xURL2 + _0xURL3;
 
-// كلمة المرور مشفرة (SHA-256 hash لـ admin2026)
-const ADMIN_HASH = 'c89bb74a71391fb6e55d9fbacc435b18e83c5dddb2fabc6c8bcf09b0e8f4d310';
+// كلمة المرور مشفرة (SHA-256 hash لـ google2026)
+const ADMIN_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
 
 const DOCTOR_WHATSAPP = '201095810582';
 
