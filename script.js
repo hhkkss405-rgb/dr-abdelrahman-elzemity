@@ -1,5 +1,5 @@
 // ==========================================
-// رابط Google Apps Script بتاعك (ثابت)
+// رابط Google Apps Script بتاعك
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdM2IOtynsJAPu1cnBHJJcoZH6Z0w9t4lVtKQ4THpQbZ9deYXEZA8TxbAE-_SiaaJG/exec';
 // ==========================================
 
@@ -36,7 +36,7 @@ if (bookingForm) {
             notes: document.getElementById('notes').value || ''
         };
         
-        // ✅ الخطوة 1: فتح واتساب فوراً (رابط رسمي من واتساب)
+        // ✅ الخطوة 1: فتح واتساب فوراً
         sendWhatsAppMessage(formData);
         
         // ✅ الخطوة 2: إرسال للشيت في الخلفية
@@ -46,14 +46,14 @@ if (bookingForm) {
             mode: 'no-cors'
         }).catch(err => console.log('Sheet error:', err));
         
-        // ✅ الخطوة 3: رسالة نجاح واضحة جداً للمريض
-        showMessage('✅ تم تأكيد الحجز! سيفتح الواتساب تلقائياً. اضغط على "فتح الواتساب" إن طلب ذلك.', 'success');
+        // ✅ الخطوة 3: رسالة نجاح وتفريغ النموذج
+        showMessage('تم تأكيد الحجز بنجاح!', 'success');
         bookingForm.reset();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
-// دالة فتح واتساب (باستخدام الرابط الرسمي)
+// دالة فتح واتساب (الرابط الرسمي)
 function sendWhatsAppMessage(data) {
     const message = `🏥 *حجز جديد في عيادة الدكتور عبدالرحمن الزميتي*
 
@@ -67,16 +67,21 @@ function sendWhatsAppMessage(data) {
 
 ⏰ *وقت الحجز:* ${new Date().toLocaleString('ar-EG')}`;
     
-    // الرابط الرسمي من واتساب api.whatsapp.com/send
+    // ✅ الرابط الرسمي من واتساب
     const url = `https://api.whatsapp.com/send?phone=${DOCTOR_WHATSAPP}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
 }
 
-// رسالة تأكيد للمريض
+// رسالة تأكيد
 function showMessage(msg, type = 'success') {
+    // لو رسالة نجاح الحجز، نضيف تعليمات
+    if (type === 'success' && msg.includes('تم تأكيد الحجز')) {
+        msg = `✅ تم تأكيد الحجز بنجاح!<br>🔔 اضغط "فتح التطبيق" في الصفحة التالية لإرسال الرسالة.<br>❤️ شكراً لاستخدامك خدماتنا`;
+    }
+
     const div = document.createElement('div');
     div.className = `success-message ${type === 'error' ? 'error-message' : ''}`;
-    div.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${msg}`;
+    div.innerHTML = msg;
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 8000);
 }
@@ -114,6 +119,7 @@ async function loadBookings() {
         displayBookings(bookings);
         updateStats(bookings);
         
+        // صوت تنبيه لو فيه حجز جديد
         if (bookings.length > lastCount && lastCount > 0) {
             playNotification();
         }
@@ -204,5 +210,5 @@ document.addEventListener('DOMContentLoaded', () => {
         loadBookings();
     });
     
-    setInterval(loadBookings, 10000);
+    setInterval(loadBookings, 10000); // تحديث كل 10 ثواني
 });
