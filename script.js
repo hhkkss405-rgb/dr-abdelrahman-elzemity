@@ -36,24 +36,24 @@ if (bookingForm) {
             notes: document.getElementById('notes').value || ''
         };
         
-        // ✅ الخطوة 1: فتح واتساب فوراً (عشان المتصفح يسمح)
+        // ✅ الخطوة 1: فتح واتساب فوراً (رابط رسمي من واتساب)
         sendWhatsAppMessage(formData);
         
-        // ✅ الخطوة 2: إرسال للشيت في الخلفية (من غير ما المريض يحس)
+        // ✅ الخطوة 2: إرسال للشيت في الخلفية
         const params = new URLSearchParams(formData).toString();
         fetch(`${SCRIPT_URL}?${params}`, {
             method: 'POST',
-            mode: 'no-cors' // مهمة جداً عشان الشيت يشتغل من جيت هاب
-        }).catch(err => console.log('Sheet error:', err)); // لو الشيت مش شغال، متوقفش الموقع
+            mode: 'no-cors'
+        }).catch(err => console.log('Sheet error:', err));
         
-        // ✅ الخطوة 3: رسالة نجاح وتفريغ النموذج
-        showMessage('🎉 تم تأكيد الحجز! سيتم التواصل قريباً.', 'success');
+        // ✅ الخطوة 3: رسالة نجاح واضحة جداً للمريض
+        showMessage('✅ تم تأكيد الحجز! سيفتح الواتساب تلقائياً. اضغط على "فتح الواتساب" إن طلب ذلك.', 'success');
         bookingForm.reset();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
-// دالة فتح واتساب
+// دالة فتح واتساب (باستخدام الرابط الرسمي)
 function sendWhatsAppMessage(data) {
     const message = `🏥 *حجز جديد في عيادة الدكتور عبدالرحمن الزميتي*
 
@@ -67,17 +67,18 @@ function sendWhatsAppMessage(data) {
 
 ⏰ *وقت الحجز:* ${new Date().toLocaleString('ar-EG')}`;
     
-    const url = `https://wa.me/${DOCTOR_WHATSAPP}?text=${encodeURIComponent(message)}`;
+    // الرابط الرسمي من واتساب api.whatsapp.com/send
+    const url = `https://api.whatsapp.com/send?phone=${DOCTOR_WHATSAPP}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
 }
 
-// رسالة تأكيد
+// رسالة تأكيد للمريض
 function showMessage(msg, type = 'success') {
     const div = document.createElement('div');
     div.className = `success-message ${type === 'error' ? 'error-message' : ''}`;
     div.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${msg}`;
     document.body.appendChild(div);
-    setTimeout(() => div.remove(), 5000);
+    setTimeout(() => div.remove(), 8000);
 }
 
 // ==================== لوحة الإدارة ====================
@@ -88,7 +89,7 @@ if (loginForm) {
         if (document.getElementById('password').value === ADMIN_PASSWORD) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
-            loadBookings(); // تحميل الحجوزات
+            loadBookings();
         } else {
             showMessage('كلمة المرور خاطئة!', 'error');
         }
@@ -113,7 +114,6 @@ async function loadBookings() {
         displayBookings(bookings);
         updateStats(bookings);
         
-        // صوت تنبيه لو فيه حجز جديد
         if (bookings.length > lastCount && lastCount > 0) {
             playNotification();
         }
@@ -204,5 +204,5 @@ document.addEventListener('DOMContentLoaded', () => {
         loadBookings();
     });
     
-    setInterval(loadBookings, 10000); // تحديث كل 10 ثواني
+    setInterval(loadBookings, 10000);
 });
