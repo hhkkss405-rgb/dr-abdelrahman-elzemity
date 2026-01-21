@@ -5,19 +5,10 @@ const _0xURL2 = 'AKfycbwdM2IOtynsJAPu1cnBHJJcoZH6Z0w9t4lVtKQ4THpQbZ9deYXEZA8TxbA
 const _0xURL3 = '/exec';
 const SCRIPT_URL = _0xURL1 + _0xURL2 + _0xURL3;
 
-// كلمة المرور مشفرة (SHA-256 hash لـ google2026)
-const ADMIN_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+// كلمة المرور (بدون تشفير)
+const ADMIN_PASSWORD = 'google2026';
 
 const DOCTOR_WHATSAPP = '201095810582';
-
-// دالة تشفير كلمة المرور
-async function hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 // ==================== نموذج الحجز مع الحماية ====================
 const bookingForm = document.getElementById('bookingForm');
@@ -104,17 +95,12 @@ function showMessage(msg, type = 'success') {
     setTimeout(() => div.remove(), 8000);
 }
 
-// ==================== لوحة الإدارة المحمية ====================
+// ==================== لوحة الإدارة ====================
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const passwordInput = document.getElementById('password').value;
-        
-        // ✅ تشفير الإدخال ومقارنته بالكود المشفر
-        const inputHash = await hashPassword(passwordInput);
-        
-        if (inputHash === ADMIN_HASH) {
+        if (document.getElementById('password').value === ADMIN_PASSWORD) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
             loadBookings();
