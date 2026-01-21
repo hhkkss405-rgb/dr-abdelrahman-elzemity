@@ -10,6 +10,7 @@
 <body>
     <!-- Header -->
     <header class="header">
+        <div class="top-title">مستشفى دمياط التخصصي</div>
         <div class="container">
             <div class="doctor-profile">
                 <img src="doctor.jpg" alt="د. عبدالرحمن الزميتي" class="doctor-img">
@@ -117,6 +118,9 @@
             <h2><i class="fas fa-calendar-check"></i> احجز موعدك الآن</h2>
             
             <form id="bookingForm" class="booking-form">
+                <!-- حقل حماية مخفي ضد الروبوتات -->
+                <input type="text" name="honeypot" id="honeypot" style="display:none" tabindex="-1" autocomplete="off">
+
                 <div class="form-group">
                     <label for="name"><i class="fas fa-user"></i> الاسم</label>
                     <input type="text" id="name" name="name" required>
