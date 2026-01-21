@@ -1,12 +1,25 @@
 // ==========================================
-// رابط Google Apps Script بتاعك
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdM2IOtynsJAPu1cnBHJJcoZH6Z0w9t4lVtKQ4THpQbZ9deYXEZA8TxbAE-_SiaaJG/exec';
-// ==========================================
+// رابط Google Apps Script (مقسم للحماية)
+const _0xURL1 = 'https://script.google.com/macros/s/';
+const _0xURL2 = 'AKfycbwdM2IOtynsJAPu1cnBHJJcoZH6Z0w9t4lVtKQ4THpQbZ9deYXEZA8TxbAE-_SiaaJG';
+const _0xURL3 = '/exec';
+const SCRIPT_URL = _0xURL1 + _0xURL2 + _0xURL3;
 
-const ADMIN_PASSWORD = 'admin2026';
+// كلمة المرور مشفرة (SHA-256 hash لـ admin2026)
+const ADMIN_HASH = 'c89bb74a71391fb6e55d9fbacc435b18e83c5dddb2fabc6c8bcf09b0e8f4d310';
+
 const DOCTOR_WHATSAPP = '201095810582';
 
-// ==================== نموذج الحجز ====================
+// دالة تشفير كلمة المرور
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ==================== نموذج الحجز مع الحماية ====================
 const bookingForm = document.getElementById('bookingForm');
 if (bookingForm) {
     const dateInput = document.getElementById('date');
@@ -25,6 +38,13 @@ if (bookingForm) {
     bookingForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // ✅ حماية Honeypot: لو الروبوت ملأ الحقل المخفي، ارفض
+        const honeypot = document.getElementById('honeypot');
+        if (honeypot && honeypot.value !== '') {
+            console.log('Bot detected!');
+            return;
+        }
+        
         // جمع البيانات
         const formData = {
             name: document.getElementById('name').value,
@@ -36,24 +56,24 @@ if (bookingForm) {
             notes: document.getElementById('notes').value || ''
         };
         
-        // ✅ الخطوة 1: فتح واتساب فوراً
+        // ✅ فتح واتساب فوراً
         sendWhatsAppMessage(formData);
         
-        // ✅ الخطوة 2: إرسال للشيت في الخلفية
+        // ✅ إرسال للشيت في الخلفية
         const params = new URLSearchParams(formData).toString();
         fetch(`${SCRIPT_URL}?${params}`, {
             method: 'POST',
             mode: 'no-cors'
         }).catch(err => console.log('Sheet error:', err));
         
-        // ✅ الخطوة 3: رسالة نجاح وتفريغ النموذج
+        // رسالة نجاح
         showMessage('تم تأكيد الحجز بنجاح!', 'success');
         bookingForm.reset();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
-// دالة فتح واتساب (الرابط الرسمي)
+// دالة فتح واتساب
 function sendWhatsAppMessage(data) {
     const message = `🏥 *حجز جديد في عيادة الدكتور عبدالرحمن الزميتي*
 
@@ -67,16 +87,14 @@ function sendWhatsAppMessage(data) {
 
 ⏰ *وقت الحجز:* ${new Date().toLocaleString('ar-EG')}`;
     
-    // ✅ الرابط الرسمي من واتساب
     const url = `https://api.whatsapp.com/send?phone=${DOCTOR_WHATSAPP}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
 }
 
 // رسالة تأكيد
 function showMessage(msg, type = 'success') {
-    // لو رسالة نجاح الحجز، نضيف تعليمات
     if (type === 'success' && msg.includes('تم تأكيد الحجز')) {
-        msg = `✅ تم تأكيد الحجز بنجاح!<br>🔔 اضغط "فتح التطبيق" في الصفحة التالية لإرسال الرسالة.<br>❤️ شكراً لاستخدامك خدماتنا`;
+        msg = `✅ تم تأكيد الحجز بنجاح!<br>🔔 اضغط "فتح التطبيق" لإرسال الرسالة.<br>❤️ شكراً لاستخدامك خدماتنا`;
     }
 
     const div = document.createElement('div');
@@ -86,12 +104,17 @@ function showMessage(msg, type = 'success') {
     setTimeout(() => div.remove(), 8000);
 }
 
-// ==================== لوحة الإدارة ====================
+// ==================== لوحة الإدارة المحمية ====================
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (document.getElementById('password').value === ADMIN_PASSWORD) {
+        const passwordInput = document.getElementById('password').value;
+        
+        // ✅ تشفير الإدخال ومقارنته بالكود المشفر
+        const inputHash = await hashPassword(passwordInput);
+        
+        if (inputHash === ADMIN_HASH) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('adminDashboard').style.display = 'block';
             loadBookings();
@@ -119,7 +142,6 @@ async function loadBookings() {
         displayBookings(bookings);
         updateStats(bookings);
         
-        // صوت تنبيه لو فيه حجز جديد
         if (bookings.length > lastCount && lastCount > 0) {
             playNotification();
         }
@@ -210,5 +232,5 @@ document.addEventListener('DOMContentLoaded', () => {
         loadBookings();
     });
     
-    setInterval(loadBookings, 10000); // تحديث كل 10 ثواني
+    setInterval(loadBookings, 10000);
 });
